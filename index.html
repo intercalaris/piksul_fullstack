@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Pixel Grid Snapper</title>
+</head>
+<body>
+  <input type="file" id="upload" />
+  <div id="controls" style="display: none;">
+    <label for="gridSizeInput">Grid Size: </label>
+    <input type="number" id="gridSizeInput" min="1" max="100">
+    <label for="toleranceInput">Color Tolerance: </label>
+    <input type="number" id="toleranceInput" min="0" max="255">
+  </div>
+  <button id="snapButton" style="display: none;">Snap to Grid</button>
+  <div id="comparison" style="display: none;">
+    <figure>
+      <div id="divisor"></div>
+    </figure>
+    <input type="range" min="0" max="100" value="50" id="slider" oninput="moveDivisor()">
+  </div>
+  <button id="downloadButton" style="display: none;">Download Image</button>
+  <script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>
