@@ -6,7 +6,7 @@ html {
 .button {
   display: inline-block;
   padding: 10px 20px;
-  width: 9rem;
+  width: auto;
   font-size: 16px;
   color: #fff;
   background-color: #007BFF;

@@ -49,7 +49,7 @@ uploadInput?.addEventListener('change', (event) => {
         toleranceInput.value = userTolerance;
 
         // Show the snap button, controls, and comparison after the image load
-        snapButton.style.display = 'block';
+        snapButton.style.display = 'inline-block';
         controls.style.display = 'block';
         comparison.style.display = 'block';
 
@@ -328,7 +328,7 @@ function snapToGrid(gridSize, tolerance) {
         divisor.style.backgroundPosition = "top left";
 
         // Show download and save project buttons
-        downloadButton.style.display = 'block';
-        saveProjectButton.style.display = 'block';
+        downloadButton.style.display = 'inline-block';
+        saveProjectButton.style.display = 'inline-block';
     };
 }
