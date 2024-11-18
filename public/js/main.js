@@ -21,20 +21,6 @@ let estimatedTolerance = 30;
 
 
 
-// if (startProjectButton) {
-//     startProjectButton.addEventListener('click', () => {
-//         window.location.href = '/editor';
-//         fetch()
-//     });
-// }
-
-// if (viewSavedProjectsButton) {
-//     viewSavedProjectsButton.addEventListener('click', () => {
-//       window.location.href = '/projects'; // Redirect to the gallery route
-//     });
-// }
-
-
 uploadInput?.addEventListener('change', (event) => {
     const file = event.target.files[0];
 
@@ -97,59 +83,6 @@ downloadButton?.addEventListener('click', () => {
 slider?.addEventListener('input', () =>  {
     divisor.style.width = slider.value + "%";
 });
-
-
-// openProjectButtons.forEach(button => {
-//   button.addEventListener('click', function() {
-//     const projectId = this.closest('.project-card').getAttribute('data-id');
-    
-//     fetch(`/api/projects/${projectId}`, {
-//       method: 'GET',
-//       headers: { 'Content-Type': 'application/json' }
-//     })
-//     .then(response => {
-//       if (response.ok) return response.json();
-//     })
-//     .then(project => {
-//       // Show controls and comparison
-//       controls.style.display = 'block';
-//       snapButton.style.display = 'block';
-//       comparison.style.display = 'block';
-      
-//       // Set form values
-//       gridSizeInput.value = project.grid_size;
-//       toleranceInput.value = project.tolerance;
-      
-//       // Set up comparison view with original and snapped images
-//       document.querySelector('#comparison figure').style.backgroundImage = 
-//         `url(/images/${project.original_image})`;
-      
-//       divisor.style.backgroundImage = `url(/images/${project.snapped_image})`;
-      
-//       // Show download and save buttons
-//       downloadButton.style.display = 'block';
-//       saveProjectButton.style.display = 'block';
-//     })
-//     .catch(err => console.error(err));
-//   });
-// });
-
-// deleteProjectButtons.forEach(button => {
-//     button.addEventListener('click', function() {
-//       const projectId = this.closest('.project-card').getAttribute('data-id');
-      
-//       fetch(`/api/projects/${projectId}`, {
-//         method: 'DELETE',
-//         headers: { 'Content-Type': 'application/json' }
-//       })
-//       .then(response => {
-//         if (response.ok) {
-//           window.location.reload(true);
-//         }
-//       })
-//       .catch(err => console.error(err));
-//     });
-// });
 
 
 function estimateGridSize(img, tolerance) {
