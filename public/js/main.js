@@ -9,6 +9,9 @@ const slider = document.getElementById('slider');
 const comparison = document.getElementById('comparison');
 const startProjectButton = document.getElementById('startProjectButton');
 const saveProjectButton = document.getElementById('saveProjectButton');
+const openProjectButtons = document.querySelectorAll('.open-project');
+const deleteProjectButtons = document.querySelectorAll('.delete-project');
+const viewSavedProjectsButton = document.getElementById('viewSavedProjectsButton');
 
 let originalImage = null;
 let snappedImageURL = null;
@@ -16,13 +19,23 @@ let originalFileName = '';
 let estimatedGridSize = 8;
 let estimatedTolerance = 30;
 
-if (startProjectButton) {
-    startProjectButton.addEventListener('click', () => {
-        window.location.href = '/editor';
-    });
-}
 
-uploadInput.addEventListener('change', (event) => {
+
+// if (startProjectButton) {
+//     startProjectButton.addEventListener('click', () => {
+//         window.location.href = '/editor';
+//         fetch()
+//     });
+// }
+
+// if (viewSavedProjectsButton) {
+//     viewSavedProjectsButton.addEventListener('click', () => {
+//       window.location.href = '/projects'; // Redirect to the gallery route
+//     });
+// }
+
+
+uploadInput?.addEventListener('change', (event) => {
     const file = event.target.files[0];
 
     // Reset UI elements and state for new image
@@ -59,7 +72,8 @@ uploadInput.addEventListener('change', (event) => {
     img.src = URL.createObjectURL(file);
 });
 
-snapButton.addEventListener('click', () => {
+
+snapButton?.addEventListener('click', () => {
     console.log("Snap to Grid button clicked.");
     const userGridSize = parseInt(gridSizeInput.value, 10) || estimatedGridSize;
     const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
@@ -70,7 +84,7 @@ snapButton.addEventListener('click', () => {
     snapToGrid(userGridSize, userTolerance);
 });
 
-downloadButton.addEventListener('click', () => {
+downloadButton?.addEventListener('click', () => {
     if (snappedImageURL) {
         const link = document.createElement('a');
         link.href = snappedImageURL;
@@ -80,74 +94,62 @@ downloadButton.addEventListener('click', () => {
 });
 
 
-if (saveProjectButton) {
-    saveProjectButton.addEventListener('click', async () => {
-        console.log("Save Project button clicked");
-
-        // Convert the snapped image to a Blob
-        const response = await fetch(snappedImageURL);
-        const blob = await response.blob();
-        const formData = new FormData();
-
-        // Append the original and snapped images, and project data
-        formData.append('original_image', uploadInput.files[0]);
-        formData.append('snapped_image', blob, `snapped_${originalFileName}.png`);
-        formData.append('grid_size', gridSizeInput.value || estimatedGridSize);
-        formData.append('tolerance', toleranceInput.value || estimatedTolerance);
-
-        try {
-            const res = await fetch('/save', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (res.ok) {
-                const result = await res.json();
-                console.log('Project saved successfully:', result);
-                alert('Project saved successfully!');
-            } else {
-                console.error('Failed to save project:', res.statusText);
-                alert('Failed to save project.');
-            }
-        } catch (err) {
-            console.error('Error saving project:', err);
-            alert('Error saving project.');
-        }
-    });
-}
-
-slider.addEventListener('input', () =>  {
+slider?.addEventListener('input', () =>  {
     divisor.style.width = slider.value + "%";
 });
 
 
-document.querySelectorAll('.open-project').forEach(button => {
-    button.addEventListener('click', (event) => {
-        const projectId = event.target.closest('.project-card').dataset.id; // get project ID
-        window.location.href = `/editor?id=${projectId}`; // go to editor page with project ID
-    });
-});
+// openProjectButtons.forEach(button => {
+//   button.addEventListener('click', function() {
+//     const projectId = this.closest('.project-card').getAttribute('data-id');
+    
+//     fetch(`/api/projects/${projectId}`, {
+//       method: 'GET',
+//       headers: { 'Content-Type': 'application/json' }
+//     })
+//     .then(response => {
+//       if (response.ok) return response.json();
+//     })
+//     .then(project => {
+//       // Show controls and comparison
+//       controls.style.display = 'block';
+//       snapButton.style.display = 'block';
+//       comparison.style.display = 'block';
+      
+//       // Set form values
+//       gridSizeInput.value = project.grid_size;
+//       toleranceInput.value = project.tolerance;
+      
+//       // Set up comparison view with original and snapped images
+//       document.querySelector('#comparison figure').style.backgroundImage = 
+//         `url(/images/${project.original_image})`;
+      
+//       divisor.style.backgroundImage = `url(/images/${project.snapped_image})`;
+      
+//       // Show download and save buttons
+//       downloadButton.style.display = 'block';
+//       saveProjectButton.style.display = 'block';
+//     })
+//     .catch(err => console.error(err));
+//   });
+// });
 
-document.querySelectorAll('.delete-project').forEach(button => {
-    button.addEventListener('click', (event) => {
-        const projectId = event.target.closest('.project-card').dataset.id; // Retrieve project ID
-        if (confirm('Are you sure you want to delete this project?')) {
-            fetch(`/projects/${projectId}`, { method: 'DELETE' }) // Send DELETE request to server
-                .then(response => {
-                    if (response.ok) {
-                        event.target.closest('.project-card').remove(); // Remove project card from UI
-                    } else {
-                        alert('Failed to delete project.'); // Alert user on failure
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while trying to delete the project.');
-                });
-        }
-    });
-});
-
+// deleteProjectButtons.forEach(button => {
+//     button.addEventListener('click', function() {
+//       const projectId = this.closest('.project-card').getAttribute('data-id');
+      
+//       fetch(`/api/projects/${projectId}`, {
+//         method: 'DELETE',
+//         headers: { 'Content-Type': 'application/json' }
+//       })
+//       .then(response => {
+//         if (response.ok) {
+//           window.location.reload(true);
+//         }
+//       })
+//       .catch(err => console.error(err));
+//     });
+// });
 
 
 function estimateGridSize(img, tolerance) {

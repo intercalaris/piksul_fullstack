@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
   res.render('index'); 
 });
 
-app.get('/editor', (req, res) => {
+app.get('/login', (req, res) => {
   res.render('editor');
 });
 

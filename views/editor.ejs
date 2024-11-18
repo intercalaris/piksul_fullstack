@@ -10,9 +10,9 @@
 <body>
   <header>
     <div class="banner">
-      <button class="button login"><span>Log In</span></button>
-      <button class="button create-account"><span>Create an Account</span></button>
-      <button class="button logout"><span>Log Out</span></button>
+      <a class="button login"><span>Log In</span></a>
+      <a class="button create-account"><span>Create an Account</span></a>
+      <a class="button logout"><span>Log Out</span></a>
     </div>
   </header>
   <main>
@@ -30,15 +30,15 @@
       <label for="toleranceInput">Color Tolerance: </label>
       <input type="number" id="toleranceInput" min="0" max="255">
     </div>
-    <button id="snapButton" style="display: none;">Snap to Grid</button>
+    <a class="button" id="snapButton" style="display: none;">Snap to Grid</a>
     <div id="comparison" style="display: none;">
       <figure>
         <div id="divisor"></div>
       </figure>
       <input type="range" min="0" max="100" value="50" id="slider">
     </div>
-    <button id="downloadButton" style="display: none;">Download Image</button>
-    <button id="saveProjectButton" class="button save-project" style="display: none;">Save Project to Account</button>
+    <a class="button" id="downloadButton" style="display: none;">Download Image</a>
+    <a class="button" id="saveProjectButton" class="button save-project" style="display: none;">Save Project to Account</a>
   </main>
   <script type="text/javascript" src="/js/main.js"></script>
 </body>
