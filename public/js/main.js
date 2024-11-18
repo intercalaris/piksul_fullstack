@@ -14,48 +14,70 @@ const deleteProjectButtons = document.querySelectorAll('.delete-project');
 const viewSavedProjectsButton = document.getElementById('viewSavedProjectsButton');
 
 let originalImage = null;
-let snappedImageURL = null;
+let editedImageURL = null;
+let originalBlob = null;
+let editedBlob = null;
 let originalFileName = ''; 
 let estimatedGridSize = 8;
 let estimatedTolerance = 30;
 
 
-
-uploadInput?.addEventListener('change', (event) => {
+uploadInput?.addEventListener('change', async (event) => {
     const file = event.target.files[0];
+    projectId = null; // reset project ID
+    editedImageURL = null;
+    divisor.style.backgroundImage = ''; // clear edited image from bfore
+    downloadButton.style.display = 'none'; // hide download button until snapping
 
-    // Reset UI elements and state for new image
-    snappedImageURL = null;
-    divisor.style.backgroundImage = ''; // Clear previous snapped image
-    downloadButton.style.display = 'none'; // Hide download button until new snapping is done
+    const originalImageURL = URL.createObjectURL(file);
+    originalBlob = await fetch(originalImageURL).then(res => res.blob()); // save uploaded image blob
 
     const img = new Image();
-    console.log('new image')
     img.onload = () => {
         comparison.style.aspectRatio = `${img.width} / ${img.height}`;
-        // Set original image as background of comparison container (left side)
-        const originalImageURL = URL.createObjectURL(file);
         document.querySelector('#comparison figure').style.backgroundImage = `url(${originalImageURL})`;
-        originalFileName = file.name.split('.').slice(0, -1).join('.'); // Extract name without extension after last "."
-
-        // Get user tolerance value
+        originalFileName = file.name.split('.').slice(0, -1).join('.'); // get file name minus ext
         const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
-
-        // Estimate grid size using that tolerance value
         estimatedGridSize = estimateGridSize(img, userTolerance);
-
-        // Update UI inputs with estimated values
         gridSizeInput.value = estimatedGridSize;
         toleranceInput.value = userTolerance;
-
-        // Show the snap button, controls, and comparison after the image load
         snapButton.style.display = 'inline-block';
         controls.style.display = 'block';
         comparison.style.display = 'block';
-
         console.log("Image loaded successfully.");
     };
-    img.src = URL.createObjectURL(file);
+    img.src = originalImageURL;
+});
+
+saveProjectButton?.addEventListener('click', async () => {
+    const formData = new FormData();
+    formData.append('original_image', new File([originalBlob], 'original.png'));
+    formData.append('edited_image', new File([editedBlob], 'edited.png'));
+    formData.append('grid_size', gridSizeInput.value);
+    formData.append('tolerance', toleranceInput.value);
+    if (projectId) formData.append('project_id', projectId);
+
+    try {
+        const response = await fetch('/projects', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save the project');
+        }
+
+        const result = await response.json();
+
+        if (result.project_id) {
+            console.log('Project saved successfully:', result);
+            projectId = result.project_id; // Update project ID for further saves
+        } else {
+            console.error('Invalid response: missing project ID');
+        }
+    } catch (error) {
+        console.error('Error saving the project:', error);
+    }
 });
 
 
@@ -63,21 +85,19 @@ snapButton?.addEventListener('click', () => {
     console.log("Snap to Grid button clicked.");
     const userGridSize = parseInt(gridSizeInput.value, 10) || estimatedGridSize;
     const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
-
-    console.log("User-provided tolerance value for snapping:", userTolerance);
-
-    // Create snapped version of image
+    // Create edited version of image
     snapToGrid(userGridSize, userTolerance);
 });
 
 downloadButton?.addEventListener('click', () => {
-    if (snappedImageURL) {
+    if (editedImageURL) {
         const link = document.createElement('a');
-        link.href = snappedImageURL;
+        link.href = editedImageURL;
         link.download = `piksul_${originalFileName}.png`;
         link.click();
     }
 });
+
 
 
 slider?.addEventListener('input', () =>  {
@@ -272,7 +292,7 @@ function snapToGrid(gridSize, tolerance) {
     const img = new Image();
     img.src = document.querySelector('#comparison figure').style.backgroundImage.slice(5, -2); // Remove 'url("")'
 
-    img.onload = () => {
+    img.onload = async () => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
@@ -314,12 +334,14 @@ function snapToGrid(gridSize, tolerance) {
         // Put modified data back to canvas
         ctx.putImageData(imageData, 0, 0);
 
-        // Convert canvas to data URL and set the snapped image URL
-        snappedImageURL = canvas.toDataURL('image/png');
+        // Convert canvas to data URL and set the edited image URL
+        editedImageURL = canvas.toDataURL('image/png');
+        editedBlob = await fetch(editedImageURL).then(res => res.blob());
+
         console.log("Snapping complete.");
 
-        // Update divisor to show snapped image without moving
-        divisor.style.backgroundImage = `url(${snappedImageURL})`;
+        // Update divisor to show edited image without moving
+        divisor.style.backgroundImage = `url(${editedImageURL})`;
 
         // Use the exact dimensions of the comparison container
         const comparisonRect = comparison.getBoundingClientRect();
