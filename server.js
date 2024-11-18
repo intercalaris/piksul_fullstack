@@ -50,17 +50,42 @@ app.get('/editor', (req, res) => {
   res.render('editor');
 });
 
-// Display all saved projects (gallery!)
+// Endpoint to get project metadata from SQL db. Contains ids which can be used to call projects/images endpoint too
 app.get('/projects', (req, res) => {
   db.all('SELECT * FROM projects ORDER BY created_at DESC', (err, rows) => {
     if (err) {
       console.error('Error retrieving projects:', err);
-      res.status(500).send('Database error');
-    } else {
-      res.render('gallery', { projects: rows });
+      return res.status(500).send('Database error');
     }
+    // Map database rows to image endpoint paths, so images can be requested
+    const projects = rows.map((project) => ({
+      id: project.id,
+      original_image: `/projects/image/${project.original_image}`,
+      edited_image: `/projects/image/${project.edited_image}`,
+      grid_size: project.grid_size,
+      tolerance: project.tolerance,
+      created_at: project.created_at,
+    }));
+    // Render the EJS template with metadata and img endpoint paths. If client requests paths, the project/image endpoint will be called
+    res.render('gallery', { projects });
   });
 });
+
+// Image endpoint
+app.get('/projects/image/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, 'data/img', filename);
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error('Image not found:', filePath);
+      return res.status(404).send('Image not found');
+    }
+    res.sendFile(filePath); // send img file to client
+  });
+});
+
+
+
 
 
 app.post('/projects', upload.fields([{ name: 'original_image' }, { name: 'edited_image' }]), (req, res) => {
