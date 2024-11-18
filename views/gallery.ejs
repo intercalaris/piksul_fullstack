@@ -27,8 +27,8 @@
             <p>Grid Size: <%= project.grid_size %></p>
             <p>Tolerance: <%= project.tolerance %></p>
             <p>Created At: <%= new Date(project.created_at).toLocaleString() %></p>
-            <button class="open-project">Open in Editor</button>
-            <button class="delete-project">Delete</button>
+            <a class="button" id="open-project">Open in Editor</a>
+            <a class="button" id="delete-project">Delete</a>
           </div>
         <% }); %>
       <% } %>

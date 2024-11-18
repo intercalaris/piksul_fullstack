@@ -21,33 +21,61 @@ let originalFileName = '';
 let estimatedGridSize = 8;
 let estimatedTolerance = 30;
 
+function setupOriginalImage(url, imgElement) {
+    const img = new Image();
+    img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        comparison.style.aspectRatio = `${aspectRatio}`;
+        imgElement.style.backgroundImage = `url(${url})`;
+        console.log("Original image loaded successfully.");
+    };
+    img.src = url;
+}
+// set up snapped image in comparison container
+function setupSnappedImage(snappedImageURL) {
+    divisor.style.backgroundImage = `url(${snappedImageURL})`;
+    // use size of container
+    const comparisonRect = comparison.getBoundingClientRect();
+    divisor.style.backgroundSize = `${comparisonRect.width}px ${comparisonRect.height}px`;
+    divisor.style.backgroundRepeat = "no-repeat";
+    divisor.style.backgroundPosition = "top left";
+    downloadButton.style.display = 'inline-block';
+    saveProjectButton.style.display = 'inline-block';
+    console.log("Snapped image setup complete.");
+}
+
+
+function estimateAndPrepopulateGridAndTolerance(image, defaultGridSize, defaultTolerance) {
+    const tolerance = defaultTolerance;
+    const gridSize = estimateGridSize(image, tolerance); // Retain original calculation logic
+    gridSizeInput.value = gridSize;
+    toleranceInput.value = tolerance;
+    console.log("Estimated grid size:", gridSize, "and tolerance:", tolerance);
+    return { gridSize, tolerance };
+}
 
 uploadInput?.addEventListener('change', async (event) => {
     const file = event.target.files[0];
-    projectId = null; // reset project ID
-    editedImageURL = null;
-    divisor.style.backgroundImage = ''; // clear edited image from bfore
-    downloadButton.style.display = 'none'; // hide download button until snapping
+    projectId = null; // Reset project ID
+    editedImageURL = null; // Reset snapped image
+    divisor.style.backgroundImage = ''; // Clear snapped image UI
+    downloadButton.style.display = 'none'; // Hide download button
 
     const originalImageURL = URL.createObjectURL(file);
-    originalBlob = await fetch(originalImageURL).then(res => res.blob()); // save uploaded image blob
+    originalBlob = await fetch(originalImageURL).then((res) => res.blob()); // Save uploaded image blob
+
+    setupOriginalImage(originalImageURL, document.querySelector('#comparison figure'));
 
     const img = new Image();
     img.onload = () => {
-        comparison.style.aspectRatio = `${img.width} / ${img.height}`;
-        document.querySelector('#comparison figure').style.backgroundImage = `url(${originalImageURL})`;
-        originalFileName = file.name.split('.').slice(0, -1).join('.'); // get file name minus ext
-        const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
-        estimatedGridSize = estimateGridSize(img, userTolerance);
-        gridSizeInput.value = estimatedGridSize;
-        toleranceInput.value = userTolerance;
-        snapButton.style.display = 'inline-block';
         controls.style.display = 'block';
         comparison.style.display = 'block';
-        console.log("Image loaded successfully.");
+        const { gridSize, tolerance } = estimateAndPrepopulateGridAndTolerance(img, estimatedGridSize, estimatedTolerance);
+        snapButton.style.display = 'inline-block';
     };
     img.src = originalImageURL;
 });
+
 
 saveProjectButton?.addEventListener('click', async () => {
     const formData = new FormData();
@@ -82,12 +110,11 @@ saveProjectButton?.addEventListener('click', async () => {
 
 
 snapButton?.addEventListener('click', () => {
-    console.log("Snap to Grid button clicked.");
     const userGridSize = parseInt(gridSizeInput.value, 10) || estimatedGridSize;
     const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
-    // Create edited version of image
     snapToGrid(userGridSize, userTolerance);
 });
+
 
 downloadButton?.addEventListener('click', () => {
     if (editedImageURL) {
@@ -99,10 +126,10 @@ downloadButton?.addEventListener('click', () => {
 });
 
 
-
 slider?.addEventListener('input', () =>  {
     divisor.style.width = slider.value + "%";
 });
+
 
 
 function estimateGridSize(img, tolerance) {
@@ -283,14 +310,13 @@ function colorsAreDifferent(color1, color2, tolerance) {
 }
 
 function snapToGrid(gridSize, tolerance) {
-    console.log("Snapping to grid with size: " + gridSize);
-    console.log("Using tolerance value:", tolerance);
+    console.log("Snapping to grid with size:", gridSize, "and tolerance:", tolerance);
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Set canvas dimensions to match original image
     const img = new Image();
-    img.src = document.querySelector('#comparison figure').style.backgroundImage.slice(5, -2); // Remove 'url("")'
+    img.src = document.querySelector('#comparison figure').style.backgroundImage.slice(5, -2);
 
     img.onload = async () => {
         canvas.width = img.width;
@@ -302,10 +328,9 @@ function snapToGrid(gridSize, tolerance) {
         const width = canvas.width;
         const height = canvas.height;
 
-        // Snap to grid
+        // Snap logic remains unchanged
         for (let y = 0; y < height; y += gridSize) {
             for (let x = 0; x < width; x += gridSize) {
-                // Sample color from central pixel of current grid cell
                 const centerX = Math.min(x + Math.floor(gridSize / 2), width - 1);
                 const centerY = Math.min(y + Math.floor(gridSize / 2), height - 1);
                 const index = (centerY * width + centerX) * 4;
@@ -314,7 +339,6 @@ function snapToGrid(gridSize, tolerance) {
                 const b = data[index + 2];
                 const a = data[index + 3];
 
-                // Set all pixels in grid cell to sampled color
                 for (let offsetY = 0; offsetY < gridSize; offsetY++) {
                     for (let offsetX = 0; offsetX < gridSize; offsetX++) {
                         const pixelX = x + offsetX;
@@ -331,26 +355,11 @@ function snapToGrid(gridSize, tolerance) {
             }
         }
 
-        // Put modified data back to canvas
         ctx.putImageData(imageData, 0, 0);
 
-        // Convert canvas to data URL and set the edited image URL
         editedImageURL = canvas.toDataURL('image/png');
-        editedBlob = await fetch(editedImageURL).then(res => res.blob());
+        editedBlob = await fetch(editedImageURL).then((res) => res.blob());
 
-        console.log("Snapping complete.");
-
-        // Update divisor to show edited image without moving
-        divisor.style.backgroundImage = `url(${editedImageURL})`;
-
-        // Use the exact dimensions of the comparison container
-        const comparisonRect = comparison.getBoundingClientRect();
-        divisor.style.backgroundSize = `${comparisonRect.width}px ${comparisonRect.height}px`;
-        divisor.style.backgroundRepeat = "no-repeat";
-        divisor.style.backgroundPosition = "top left";
-
-        // Show download and save project buttons
-        downloadButton.style.display = 'inline-block';
-        saveProjectButton.style.display = 'inline-block';
+        setupSnappedImage(editedImageURL); // Call the helper function
     };
 }
