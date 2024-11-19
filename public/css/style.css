@@ -1,12 +1,38 @@
-html {
-  height: 100%
+/******************************************
+/* CSS
+/*******************************************/
+
+/* Box Model Hack */
+*{
+  box-sizing: border-box;
 }
 
+/******************************************
+/* LAYOUT
+/*******************************************/
+img{
+  display: block;
+  margin: 0 auto;
+}
+
+/******************************************
+/* ADDITIONAL STYLES
+/*******************************************/
+html {
+  font-size: 62.5%;
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  font-size: 2rem;
+}
 /* BUTTONS */
 .button {
   display: inline-block;
+  transition: all 0.2s ease;
   padding: 10px 20px;
-  width: auto;
   font-size: 16px;
   color: #fff;
   background-color: #007BFF;
@@ -15,20 +41,62 @@ html {
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.141);
+  border: 2px solid #fff;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.2);
+  margin: 8px;
 }
-
 .button:hover {
-  background-color: #0056b3;
+  background: rgba(255, 255, 255, 0.207);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.3);
+}
+.button:active {
+  background: rgba(255, 255, 255, 0.438);
+  box-shadow: 0 0 30px rgba(231, 246, 249, 0.572), 0 0 70px rgba(248, 245, 192, 0.735);
 }
 
-.button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
+/* GENERAL */
+.banner {
+  display: flex;
+  justify-content: end;
+  background-color: rgb(23, 2, 63);
+  border: 2px solid rgb(22, 22, 59);
 }
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+img {
+  width: 35vw;
+  border-radius: 5px;
+}
+.projects-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 15px;
+  gap: 20px;
+  margin-left: 10px;
+}
+.project-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.project-info {
+  padding-top: 10px;
+}
+.project-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+
 
 /* COMPARISON DISPLAY */
 body {
-  background-color: black;
+  background-color: rgb(15, 4, 34);
   color: white;
   min-height: 100vh;
 }

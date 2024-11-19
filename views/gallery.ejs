@@ -24,11 +24,15 @@
         <% projects.forEach(project => { %>
           <div class="project-card" data-id="<%= project.id %>">
             <img src="<%= project.edited_image %>" alt="Project Thumbnail">
-            <p>Grid Size: <%= project.grid_size %></p>
-            <p>Tolerance: <%= project.tolerance %></p>
-            <p>Created At: <%= new Date(project.created_at).toLocaleString() %></p>
-            <a href="/editor/<%= project.id %>" class="button" id="open-project">Open in Editor</a>
-            <a class="button delete-project">Delete</a>
+            <div class="project-info">
+              <p>Grid Size: <%= project.grid_size %></p>
+              <p>Tolerance: <%= project.tolerance %></p>
+              <p>Created At: <%= new Date(project.created_at).toLocaleString() %></p>
+            </div>
+            <div class="project-buttons">
+              <a href="/editor/<%= project.id %>" class="button" id="open-project">Open in Editor</a>
+              <a class="button delete-project">Delete</a>
+            </div>
           </div>
         <% }); %>
       <% } %>
