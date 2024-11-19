@@ -27,12 +27,13 @@
             <p>Grid Size: <%= project.grid_size %></p>
             <p>Tolerance: <%= project.tolerance %></p>
             <p>Created At: <%= new Date(project.created_at).toLocaleString() %></p>
-            <a class="button" id="open-project">Open in Editor</a>
-            <a class="button" id="delete-project">Delete</a>
+            <a href="/editor/<%= project.id %>" class="button" id="open-project">Open in Editor</a>
+            <a class="button delete-project">Delete</a>
           </div>
         <% }); %>
       <% } %>
     </section>
   </main>
+  <script type="text/javascript" src="/js/main.js"></script>
 </body>
 </html>

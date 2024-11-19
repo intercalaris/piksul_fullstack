@@ -50,6 +50,7 @@ app.get('/editor', (req, res) => {
   res.render('editor');
 });
 
+
 // Endpoint to get project metadata from SQL db. Contains ids which can be used to call projects/images endpoint too
 app.get('/projects', (req, res) => {
   db.all('SELECT * FROM projects ORDER BY created_at DESC', (err, rows) => {
@@ -71,7 +72,7 @@ app.get('/projects', (req, res) => {
   });
 });
 
-// Image endpoint
+// Image endpoint, consider redoing
 app.get('/projects/image/:filename', (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(__dirname, 'data/img', filename);
@@ -83,10 +84,6 @@ app.get('/projects/image/:filename', (req, res) => {
     res.sendFile(filePath); // send img file to client
   });
 });
-
-
-
-
 
 app.post('/projects', upload.fields([{ name: 'original_image' }, { name: 'edited_image' }]), (req, res) => {
   const { grid_size, tolerance, project_id } = req.body;
@@ -140,6 +137,32 @@ app.post('/projects', upload.fields([{ name: 'original_image' }, { name: 'edited
       );
   }
 });
+
+app.delete('/projects/:id', (req, res) => {
+  const projectID = req.params.id;
+  const originalImagePath = path.join(__dirname, 'data/img', `${projectID}_original.png`);
+  const editedImagePath = path.join(__dirname, 'data/img', `${projectID}_edited.png`);
+  // delete from SQL
+  db.run('DELETE FROM projects WHERE id = ?', [projectID], (deleteErr) => {
+    if (deleteErr) {
+      console.error('Error deleting project from database:', deleteErr);
+      return res.status(500).send('Failed to delete project');
+    }
+    // delete associated image files
+    [originalImagePath, editedImagePath].forEach((filePath) => {
+      fs.unlink(filePath, (unlinkErr) => {
+        if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+          console.error(`Error deleting file ${filePath}:`, unlinkErr);
+        }
+      });
+    });
+    console.log(`Project ${projectID} deleted.`);
+    res.send(`Project ${projectID} deleted.`);
+  });
+});
+
+
+
 
 
 

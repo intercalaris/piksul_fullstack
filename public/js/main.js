@@ -31,9 +31,8 @@ function setupOriginalImage(url, imgElement) {
     };
     img.src = url;
 }
-// set up snapped image in comparison container
-function setupSnappedImage(snappedImageURL) {
-    divisor.style.backgroundImage = `url(${snappedImageURL})`;
+function setupSnappedImage(editedImageURL) {
+    divisor.style.backgroundImage = `url(${editedImageURL})`;
     // use size of container
     const comparisonRect = comparison.getBoundingClientRect();
     divisor.style.backgroundSize = `${comparisonRect.width}px ${comparisonRect.height}px`;
@@ -43,26 +42,49 @@ function setupSnappedImage(snappedImageURL) {
     saveProjectButton.style.display = 'inline-block';
     console.log("Snapped image setup complete.");
 }
-
-
-function estimateAndPrepopulateGridAndTolerance(image, defaultGridSize, defaultTolerance) {
+function populateGridAndTolerance(image, defaultGridSize, defaultTolerance) {
     const tolerance = defaultTolerance;
-    const gridSize = estimateGridSize(image, tolerance); // Retain original calculation logic
+    const gridSize = estimateGridSize(image, tolerance);
     gridSizeInput.value = gridSize;
     toleranceInput.value = tolerance;
     console.log("Estimated grid size:", gridSize, "and tolerance:", tolerance);
     return { gridSize, tolerance };
 }
+// OPEN PROJECT FUNCTION UNFINISHED... figuring out logic for it
+function openProject(click) {
+    const openProjectButton = click.target;
+    const project = openProjectButton.closest('.project-card');
+    const projectID = project.getAttribute("data-id");
+    //load original image and save to const
+    //load edited image and save to const
+} 
+async function deleteProject(click) {
+    console.log('delete commencing');
+    const deleteProjectButton = click.target;
+    const project = deleteProjectButton.closest(".project-card");
+    const projectID = project.getAttribute("data-id");
+    try {
+        const response = await fetch(`/projects/${projectID}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error("Error deleting project:", error);
+      }
+}
 
 uploadInput?.addEventListener('change', async (event) => {
     const file = event.target.files[0];
-    projectId = null; // Reset project ID
-    editedImageURL = null; // Reset snapped image
-    divisor.style.backgroundImage = ''; // Clear snapped image UI
-    downloadButton.style.display = 'none'; // Hide download button
+    projectId = null; // reset project ID
+    editedImageURL = null; // reset snapped image
+    divisor.style.backgroundImage = ''; // clear snapped image UI
+    downloadButton.style.display = 'none'; // hide download button
 
     const originalImageURL = URL.createObjectURL(file);
-    originalBlob = await fetch(originalImageURL).then((res) => res.blob()); // Save uploaded image blob
+    originalBlob = await fetch(originalImageURL).then((res) => res.blob()); // save uploaded image  b l o b
 
     setupOriginalImage(originalImageURL, document.querySelector('#comparison figure'));
 
@@ -70,13 +92,11 @@ uploadInput?.addEventListener('change', async (event) => {
     img.onload = () => {
         controls.style.display = 'block';
         comparison.style.display = 'block';
-        const { gridSize, tolerance } = estimateAndPrepopulateGridAndTolerance(img, estimatedGridSize, estimatedTolerance);
+        const { gridSize, tolerance } = populateGridAndTolerance(img, estimatedGridSize, estimatedTolerance);
         snapButton.style.display = 'inline-block';
     };
     img.src = originalImageURL;
 });
-
-
 saveProjectButton?.addEventListener('click', async () => {
     const formData = new FormData();
     formData.append('original_image', new File([originalBlob], 'original.png'));
@@ -94,12 +114,10 @@ saveProjectButton?.addEventListener('click', async () => {
         if (!response.ok) {
             throw new Error('Failed to save the project');
         }
-
         const result = await response.json();
-
         if (result.project_id) {
             console.log('Project saved successfully:', result);
-            projectId = result.project_id; // Update project ID for further saves
+            projectId = result.project_id; // update ID for later saves
         } else {
             console.error('Invalid response: missing project ID');
         }
@@ -107,15 +125,11 @@ saveProjectButton?.addEventListener('click', async () => {
         console.error('Error saving the project:', error);
     }
 });
-
-
 snapButton?.addEventListener('click', () => {
     const userGridSize = parseInt(gridSizeInput.value, 10) || estimatedGridSize;
     const userTolerance = parseInt(toleranceInput.value, 10) || estimatedTolerance;
     snapToGrid(userGridSize, userTolerance);
 });
-
-
 downloadButton?.addEventListener('click', () => {
     if (editedImageURL) {
         const link = document.createElement('a');
@@ -124,14 +138,15 @@ downloadButton?.addEventListener('click', () => {
         link.click();
     }
 });
-
+deleteProjectButtons?.forEach(button => button.addEventListener("click", deleteProject));
+openProjectButtons?.forEach(button => button.addEventListener("click", openProject));
 
 slider?.addEventListener('input', () =>  {
     divisor.style.width = slider.value + "%";
 });
 
 
-
+// MAFFAMATIKS
 function estimateGridSize(img, tolerance) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -309,6 +324,7 @@ function colorsAreDifferent(color1, color2, tolerance) {
     );
 }
 
+
 function snapToGrid(gridSize, tolerance) {
     console.log("Snapping to grid with size:", gridSize, "and tolerance:", tolerance);
 
@@ -327,8 +343,6 @@ function snapToGrid(gridSize, tolerance) {
         const data = imageData.data;
         const width = canvas.width;
         const height = canvas.height;
-
-        // Snap logic remains unchanged
         for (let y = 0; y < height; y += gridSize) {
             for (let x = 0; x < width; x += gridSize) {
                 const centerX = Math.min(x + Math.floor(gridSize / 2), width - 1);
@@ -354,12 +368,9 @@ function snapToGrid(gridSize, tolerance) {
                 }
             }
         }
-
         ctx.putImageData(imageData, 0, 0);
-
         editedImageURL = canvas.toDataURL('image/png');
         editedBlob = await fetch(editedImageURL).then((res) => res.blob());
-
-        setupSnappedImage(editedImageURL); // Call the helper function
+        setupSnappedImage(editedImageURL); 
     };
 }
