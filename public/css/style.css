@@ -68,9 +68,16 @@ main {
   flex-direction: column;
   align-items: center;
 }
+.action-buttons {
+  display: flex;
+  justify-content: center;
+}
 img {
   width: 35vw;
   border-radius: 5px;
+}
+#demo-img {
+  width: 45vw;
 }
 .projects-gallery {
   display: flex;
