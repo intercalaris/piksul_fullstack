@@ -10,4 +10,6 @@ To run locally, clone the repository, install dependencies using `npm install`, 
 CRUD OPERATIONS:
 For the full list of current crud operations, open server.js
 
+For "imperfect" pixel art samples to test the app on, navigate to public\img
+
 ![alt text](image.png)
